@@ -1,41 +1,55 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'fabric-loom' version '1.15-SNAPSHOT'
 	id 'maven-publish'
 }
 
 version = project.mod_version
 group = project.maven_group
 
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+base {
+	archivesName = project.archives_base_name
 }
 
-fabricApi {
-	configureDataGeneration {
-		client = true
+repositories {
+	// 添加 Maven 中央仓库
+	mavenCentral()
+	// Fabric 仓库
+	maven {
+		name = "Fabric"
+		url = "https://maven.fabricmc.net/"
 	}
+	// 其他需要的仓库
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+	maven { url "https://maven.architectury.dev/" }
+	maven { url "https://maven.latticg.com/" } // Lat's Mods (FTB)
+	maven { url "https://maven.saps.dev/releases/" } // FTB 官方仓库
+	maven { url "https://maven.ftb.dev/releases/" } // FTB 官方仓库
 }
+
 
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
+	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+
 }
 
 processResources {
-	def version = project.version
-	inputs.property "version", version
+	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand "version": project.version
 	}
 }
 
@@ -54,11 +68,10 @@ java {
 }
 
 jar {
-	def projectName = project.name
-	inputs.property "projectName", projectName
+	inputs.property "archivesName", project.base.archivesName
 
 	from("LICENSE") {
-		rename { "${it}_$projectName"}
+		rename { "${it}_${inputs.properties.archivesName}"}
 	}
 }
 
@@ -66,6 +79,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
 			from components.java
 		}
 	}
