@@ -1,5 +1,6 @@
 package aysta3045.animals;
 
+import aysta3045.animals.effects.ModStatusEffects;
 import aysta3045.animals.enchantments.ModEnchantmentEffects;
 import net.fabricmc.api.ModInitializer;
 
@@ -13,6 +14,7 @@ public class Animals implements ModInitializer {
     public void onInitialize(){
         // 注册
         ModEnchantmentEffects.registerModEnchantmentEffects();
+        ModStatusEffects.registerModStatusEffects();
 
         LOGGER.info("Initializing Animals Successfully");
     }

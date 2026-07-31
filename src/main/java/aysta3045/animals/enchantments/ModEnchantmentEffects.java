@@ -8,15 +8,17 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class ModEnchantmentEffects {
-
-    public static final MapCodec<? extends EnchantmentEntityEffect> ANIMALEFFECT = register("animal_effect", AnimalsEnchantmentEffect.CODEC);
+    public static MapCodec<? extends EnchantmentEntityEffect> ANIMALS_ENCHANTMENT;
 
     private static MapCodec<? extends EnchantmentEntityEffect> register(String name, MapCodec<? extends EnchantmentEntityEffect> codec) {
-        return Registry.register(Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE, Identifier.of(Animals.MOD_ID, name), codec);
+        return Registry.register(
+                Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE,
+                Identifier.of(Animals.MOD_ID, name),
+                codec
+        );
     }
 
-
     public static void registerModEnchantmentEffects() {
-        // Empty
+        ANIMALS_ENCHANTMENT = register("animals_enchantment", AnimalsEnchantmentEffect.CODEC);
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.registry.RegistryWrapper;
 import java.util.concurrent.CompletableFuture;
 
 public class ModWorldGen extends FabricDynamicRegistryProvider {
-    public ModWorldGen(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture){
+    public ModWorldGen(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
         super(output, registriesFuture);
     }
 
@@ -18,7 +18,7 @@ public class ModWorldGen extends FabricDynamicRegistryProvider {
     }
 
     @Override
-    public String  getName() {
+    public String getName() {
         return "World Gen Data Generator";
     }
 }
