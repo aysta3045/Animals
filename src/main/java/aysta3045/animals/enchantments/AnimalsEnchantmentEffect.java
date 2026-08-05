@@ -1,6 +1,7 @@
 package aysta3045.animals.enchantments;
 
 import aysta3045.animals.Animals;
+import aysta3045.animals.sound.ModSounds;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.enchantment.EnchantmentEffectContext;
 import net.minecraft.enchantment.effect.EnchantmentEntityEffect;
@@ -8,17 +9,20 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.network.packet.s2c.play.StopSoundS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 
 public record AnimalsEnchantmentEffect() implements EnchantmentEntityEffect {
     public static final MapCodec<AnimalsEnchantmentEffect> CODEC = MapCodec.unit(AnimalsEnchantmentEffect::new);
     private static final Identifier EFFECT_ID = Identifier.of(Animals.MOD_ID, "animals_effect");
-    private static final int MAX_AMPLIFIER = 9; // 可选的最大等级
+    private static final int MAX_AMPLIFIER = 9;
 
     @Override
     public void apply(ServerWorld world, int level, EnchantmentEffectContext context, Entity user, Vec3d pos) {
@@ -31,7 +35,7 @@ public record AnimalsEnchantmentEffect() implements EnchantmentEntityEffect {
         }
 
         if (victim.getHealth() <= 0.0F) {
-            grantEffectToAttacker(context);
+            grantEffectToAttacker(world, context);
             return;
         }
 
@@ -39,21 +43,20 @@ public record AnimalsEnchantmentEffect() implements EnchantmentEntityEffect {
         world.getServer().execute(() -> {
             Entity delayedVictim = world.getEntityById(victimId);
             if (delayedVictim == null || (delayedVictim instanceof LivingEntity le && !le.isAlive())) {
-                grantEffectToAttacker(context);
+                grantEffectToAttacker(world, context);
             }
         });
     }
 
-    private void grantEffectToAttacker(EnchantmentEffectContext context) {
+    private void grantEffectToAttacker(ServerWorld world, EnchantmentEffectContext context) {
         Entity attacker = context.owner();
         if (!(attacker instanceof ServerPlayerEntity player)) {
             return;
         }
 
-        RegistryEntry.Reference<StatusEffect> effectRef = Registries.STATUS_EFFECT.getEntry(EFFECT_ID)
+        RegistryEntry<StatusEffect> effectRef = Registries.STATUS_EFFECT.getEntry(EFFECT_ID)
                 .orElseThrow(() -> new IllegalStateException("Missing status effect: " + EFFECT_ID));
 
-        // 直接使用 effectRef（RegistryEntry），不要 .value()
         StatusEffectInstance existing = player.getStatusEffect(effectRef);
         StatusEffectInstance newInstance;
         if (existing != null) {
@@ -64,6 +67,22 @@ public record AnimalsEnchantmentEffect() implements EnchantmentEntityEffect {
             newInstance = new StatusEffectInstance(effectRef, 24 * 20, 0);
         }
         player.addStatusEffect(newInstance);
+
+        // 播放跟随玩家的自定义音乐
+        SoundEvent sound = ModSounds.EFFECT_GRANT;
+        if (sound == null) {
+            Animals.LOGGER.warning("[AnimalsEnchantment] ModSounds.EFFECT_GRANT is null! Did you call ModSounds.register()?");
+            return;
+        }
+        Identifier soundId = sound.getId();
+
+        // 1. 停止之前的相同音乐（确保新播放不会重叠）
+        player.networkHandler.sendPacket(
+                new StopSoundS2CPacket(soundId, SoundCategory.MUSIC)
+        );
+
+        // 2. 使用 playSoundFromEntity 让音乐跟随玩家实体移动
+        world.playSoundFromEntity(null, player, sound, SoundCategory.MUSIC, 1.0F, 1.0F);
     }
 
     @Override

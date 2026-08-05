@@ -1,6 +1,7 @@
 package aysta3045.animals;
 import aysta3045.animals.effects.ModStatusEffects;
 import aysta3045.animals.enchantments.ModEnchantmentEffects;
+import aysta3045.animals.sound.ModSounds;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.registry.RegistryWrapper;
 import java.util.logging.Logger;
@@ -13,6 +14,7 @@ public class Animals implements ModInitializer {
 
     @Override
     public void onInitialize(){
+        ModSounds.register();
         ModStatusEffects.registerModStatusEffects();
         ModEnchantmentEffects.registerModEnchantmentEffects();
         LOGGER.info("Initializing Animals Successfully");

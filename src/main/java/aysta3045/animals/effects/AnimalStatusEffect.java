@@ -20,7 +20,7 @@ public class AnimalStatusEffect extends StatusEffect {
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_MOVEMENT_SPEED,
                 SPEED_MODIFIER_ID,
-                0.2D,
+                0.1D,
                 EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );
 
@@ -28,7 +28,7 @@ public class AnimalStatusEffect extends StatusEffect {
         this.addAttributeModifier(
                 EntityAttributes.GENERIC_ATTACK_DAMAGE,
                 STRENGTH_MODIFIER_ID,
-                3.0D,
+                1.0D,
                 EntityAttributeModifier.Operation.ADD_VALUE
         );
 

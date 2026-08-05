@@ -1,0 +1,10 @@
+{
+  "effect_grant": {
+    "sounds": [
+      {
+        "name": "animals:effect_grant",
+        "stream": false
+      }
+    ]
+  }
+}
